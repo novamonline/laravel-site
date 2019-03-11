@@ -1993,25 +1993,23 @@ __webpack_require__.r(__webpack_exports__);
     };
   },
   created: function created() {
-    var _this = this;
+    var $self = this,
+        $page_data =  true ? 'create' : undefined;
 
-    _.forOwn(this.page, function (obj, k) {
-      return _this.errors[k] = [];
+    _.forOwn($self.page, function (obj, k) {
+      return $self.errors[k] = [];
     });
 
-    var $self = this,
-        $data = $self.$_data,
-        $page_data = !this.pg_id ? '/pages/create' : '/pages/' + this.pg_id;
     axios.get($page_data).then(function (res) {
-      $data = res.data;
+      var $data = res.data;
       $self.Pages = $data.Pages;
       $self.Layouts = $data.Layouts;
       $self.Templates = $data.Templates;
       $self.PageTypes = $data.PageTypes;
 
-      if ($data.page.id) {
+      if ($data.page && $data.page.length) {
         $self.page = $data.page;
-      } else if ($self.page_id != -1) {
+      } else if ($self.page_id != -1 && $self.Pages.length) {
         $self.page = $self.Pages.find(function (p) {
           return p.id == $self.id;
         });
@@ -37534,8 +37532,8 @@ var render = function() {
                 {
                   name: "model",
                   rawName: "v-model",
-                  value: _vm.page.id,
-                  expression: "page.id"
+                  value: _vm.page.page_id,
+                  expression: "page.page_id"
                 }
               ],
               class: [
@@ -37555,7 +37553,7 @@ var render = function() {
                     })
                   _vm.$set(
                     _vm.page,
-                    "id",
+                    "page_id",
                     $event.target.multiple ? $$selectedVal : $$selectedVal[0]
                   )
                 }

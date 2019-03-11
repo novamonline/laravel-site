@@ -19,7 +19,7 @@ Auth::routes(['verify' => true]);
 Route::get('/home', 'HomeController@index')->name('home');
 Route::get('/admin', AdminController::class)->name('admin');
 
-if(class_exists(Page::class)){
+if(class_exists(Page::class) && Schema::hasTable('pages')){
     foreach (Page::all() as $page) {
         Route::get($page->url, $page->type);
     }

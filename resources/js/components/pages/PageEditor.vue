@@ -12,7 +12,7 @@
             </div>
             <div class="col">
                 <label for="label">Placement</label>
-                <select id="page_id" :class="[{'is-invalid': errors.page_id.length}, 'form-control']" name="page_id" v-model="page.id">
+                <select id="page_id" :class="[{'is-invalid': errors.page_id.length}, 'form-control']" name="page_id" v-model="page.page_id">
                     <option value="">(select one)</option>
                     <option value="-1">Topmost Page</option>
                     <option v-for="(page, index) in Pages" :value="page.id" :key="page.id  || 'pg-page_id-'+index"> -> /{{ page.url }}</option>
@@ -92,21 +92,22 @@ export default {
         }
     },
     created(){
-        _.forOwn(this.page, (obj, k) => this.errors[k] = [] );
-        let $self = this, $data = $self.$_data, $page_data = !(this.pg_id)? '/pages/create': '/pages/'+this.pg_id;
+        let $self = this, $page_data = '/pages/' + !(this.pg_id)? 'create': this.pg_id;
+        _.forOwn($self.page, (obj, k) => $self.errors[k] = [] );
 
         axios.get($page_data )
                 .then(res => {
-                    $data = res.data;
+                    let $data = res.data;
 
                     $self.Pages = $data.Pages;
                     $self.Layouts = $data.Layouts;
                     $self.Templates = $data.Templates;
                     $self.PageTypes = $data.PageTypes;
 
-                    if($data.page.id){
+                    if($data.page && $data.page.length){
                         $self.page = $data.page;
-                    } else if($self.page_id != -1){
+                    }
+                    else if($self.page_id != -1 && $self.Pages.length){
                         $self.page = $self.Pages.find( p => p.id == $self.id);
                     }
                 })

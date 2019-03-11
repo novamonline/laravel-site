@@ -45,17 +45,28 @@ class PageView extends ViewModel
 
     public function Layouts()
     {
-        $template = $this->page->template ?? $this->Templates()->first();
+        $template = $this->page->template ?? null;
+        if(!$template){
+            $template = $this->Templates()->first()['name'] ?? null;
+        }
 
         $view_path = base_path('templates/'. $template );
 
-        $views = [];
-        foreach(glob($view_path.'/*') as $view){
-            $name = pathinfo($view,  PATHINFO_FILENAME);
-            $path = str_replace(base_path(), "", $view);
-            $views[] = compact('name', 'path');
-        }
-        return collect($views);
+        $GetViews = function($views, $view_path) use(&$GetViews){
+
+            foreach( glob($view_path.'/*[!layouts]*') as $view ){
+                if(is_dir($view)){
+                     $views = $GetViews($views, $view);
+                     continue;
+                }
+                $name = str_replace('.blade', '', pathinfo($view, PATHINFO_FILENAME));
+                $path = str_replace(['.blade.php', base_path()], [""], realpath($view));
+
+                $views[] = ['name' => ucwords($name).' Page', 'path' => trim($path, '/\\')];
+            }
+            return $views;
+        };
+        return collect($GetViews([], $view_path))->sort();
     }
 
     public function Templates()
@@ -65,8 +76,8 @@ class PageView extends ViewModel
         $templates = [];
         foreach(glob($template_path."/*") as $template){
             $name = pathinfo($template,  PATHINFO_FILENAME);
-            $path = str_replace(base_path(), "", $template);
-            $templates[] = compact('name', 'path');
+            $path = str_replace([base_path(), 'templates'], "", $template);
+            $templates[] = ['name' => ucwords($name), 'path' => trim($path,'/\\')];
         }
         return collect($templates);
     }
@@ -74,7 +85,9 @@ class PageView extends ViewModel
     public function PageTypes()
     {
         return collect([
-            ['name' => PageController::class, 'info' => 'Basic Page']
+            [
+                'name' => 'PageController', 'info' => 'Basic Page'
+            ]
         ]);
     }
 }
