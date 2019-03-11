@@ -14,7 +14,7 @@ class PageRequest extends FormRequest
      */
     public function authorize()
     {
-        return Auth::check();
+        return  request()->isMethod('GET') || Auth::check();
     }
 
     /**
@@ -24,7 +24,7 @@ class PageRequest extends FormRequest
      */
     public function rules()
     {
-        return [
+        return request()->isMethod('GET')? []: [
             //
             'title' => 'required',
             'link' => 'unique:pages',

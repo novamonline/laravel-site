@@ -42,10 +42,12 @@ class PageController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
         //
         $data['Pages'] = Page::all();
+
+        if($request->ajax()) return $data;
 
         return view("_pg.index", $data);
     }
@@ -99,7 +101,9 @@ class PageController extends Controller
             $request->user(),
             Page::find($id)
         );
+
         if($request->ajax()) return $viewModel;
+
         $content = view('_pg.create', $viewModel);
         return view('_pg.show', compact('content'));
     }
@@ -120,15 +124,6 @@ class PageController extends Controller
         );
         $content = view('_pg.create', $viewModel);
         return view('_pg.show', compact('content'));
-        // $Page =  Page::find($id);
-        // $Pages = $Page->parent->children ?? Page::topMost();
-
-        // $data = compact('Pages', 'Page');
-        // $content = view('_pg.create', $data);
-
-        // if($request->ajax()) return $content;
-
-        // return view("_pg.show", compact('content'));
     }
 
     /**
@@ -143,6 +138,7 @@ class PageController extends Controller
         //
         $Page = Page::find($id);
         $data = $request->except('_method');
+
         if($Page){
             foreach($data as $name => $value){
                 $Page->$name = $value;

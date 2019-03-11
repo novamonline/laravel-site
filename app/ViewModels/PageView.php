@@ -43,27 +43,27 @@ class PageView extends ViewModel
         //return ($this->page->$name ?? "") == $value? ' selected="selected"': '';
     }
 
+    public function Layouts()
+    {
+        $template = $this->page->template ?? $this->Templates()->first();
+
+        $view_path = base_path('templates/'. $template );
+
+        $views = [];
+        foreach(glob($view_path.'/*') as $view){
+            $name = pathinfo($view,  PATHINFO_FILENAME);
+            $path = str_replace(base_path(), "", $view);
+            $views[] = compact('name', 'path');
+        }
+        return collect($views);
+    }
+
     public function Templates()
     {
         $template_path = base_path('templates');
-        $template_dirs = glob($template_path."/*");
 
         $templates = [];
-        foreach($template_dirs as $template){
-            $name = pathinfo($template,  PATHINFO_FILENAME);
-            $path = str_replace(base_path(), "", $template);
-            $templates[] = compact('name', 'path');
-        }
-        return collect($templates);
-    }
-
-    public function Layouts()
-    {
-        $template_path = base_path('templates');
-        $template_dirs = glob($template_path."/*");
-
-        $templates = [];
-        foreach($template_dirs as $template){
+        foreach(glob($template_path."/*") as $template){
             $name = pathinfo($template,  PATHINFO_FILENAME);
             $path = str_replace(base_path(), "", $template);
             $templates[] = compact('name', 'path');
