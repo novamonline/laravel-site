@@ -1968,6 +1968,15 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
 /* harmony default export */ __webpack_exports__["default"] = ({
   name: "page-editor",
   props: ['action', 'pg_id'],
@@ -2014,9 +2023,7 @@ __webpack_require__.r(__webpack_exports__);
           return p.id == $self.id;
         });
       }
-    }).catch(function (err) {
-      return console.log(err.response);
-    });
+    }).catch(function (err) {});
   },
   updated: function updated() {// axios.get('/pages/create')
     // .then(res => console.log(res.data))
@@ -2038,7 +2045,11 @@ __webpack_require__.r(__webpack_exports__);
       }).then(function (res) {
         return console.log(res.data);
       }).catch(function (err) {
-        return console.log(err.response.data);
+        var $errors = err.response.data.errors;
+
+        _.forOwn($errors, function (arr, k) {
+          return $self.errors[k] = arr;
+        });
       });
     }
   }
@@ -37448,17 +37459,13 @@ var render = function() {
       }
     },
     [
-      _c("input", {
-        directives: [
-          {
-            name: "show",
-            rawName: "v-show",
-            value: _vm.page.id != null,
-            expression: "page.id != null"
-          }
-        ],
-        attrs: { type: "hidden", name: "_method", value: "PUT" }
-      }),
+      _vm.page.id
+        ? [
+            _c("input", {
+              attrs: { type: "hidden", name: "_method", value: "PUT" }
+            })
+          ]
+        : _vm._e(),
       _vm._v(" "),
       _c("div", { staticClass: "form-group row" }, [
         _c("div", { staticClass: "col" }, [
@@ -37519,7 +37526,15 @@ var render = function() {
               attrs: { id: "helpTypeId" }
             },
             [_vm._v("Help text")]
-          )
+          ),
+          _vm._v(" "),
+          _vm.errors.type.length
+            ? _c("span", { staticClass: "invalid-feedback" }, [
+                _vm._v("{{ errors.type.join('"),
+                _c("br"),
+                _vm._v("') }}")
+              ])
+            : _vm._e()
         ]),
         _vm._v(" "),
         _c("div", { staticClass: "col" }, [
@@ -37587,7 +37602,15 @@ var render = function() {
               attrs: { id: "helpLabelkId" }
             },
             [_vm._v("Help text")]
-          )
+          ),
+          _vm._v(" "),
+          _vm.errors.page_id.length
+            ? _c("span", { staticClass: "invalid-feedback" }, [
+                _vm._v("{{ errors.page_id.join('"),
+                _c("br"),
+                _vm._v("') }}")
+              ])
+            : _vm._e()
         ])
       ]),
       _vm._v(" "),
@@ -37625,8 +37648,16 @@ var render = function() {
         _c(
           "small",
           { staticClass: "form-text text-muted", attrs: { id: "helpTitleId" } },
-          [_vm._v("Help text")]
-        )
+          [_vm._v("Help text [" + _vm._s(_vm.errors.title.length) + "]")]
+        ),
+        _vm._v(" "),
+        _vm.errors.title.length
+          ? _c("span", { staticClass: "invalid-feedback" }, [
+              _vm._v("{{ errors.title.join('"),
+              _c("br"),
+              _vm._v("') }}")
+            ])
+          : _vm._e()
       ]),
       _vm._v(" "),
       _c("div", { staticClass: "form-group row" }, [
@@ -37667,8 +37698,16 @@ var render = function() {
               staticClass: "form-text text-muted",
               attrs: { id: "helpTitleId" }
             },
-            [_vm._v("Help text")]
-          )
+            [_vm._v("Help text [" + _vm._s(_vm.errors.label.length) + "]")]
+          ),
+          _vm._v(" "),
+          _vm.errors.label.length
+            ? _c("span", { staticClass: "invalid-feedback" }, [
+                _vm._v("{{ errors.label.join('"),
+                _c("br"),
+                _vm._v("') }}")
+              ])
+            : _vm._e()
         ]),
         _vm._v(" "),
         _c("div", { staticClass: "col" }, [
@@ -37709,7 +37748,15 @@ var render = function() {
               attrs: { id: "helpLinkId" }
             },
             [_vm._v("Help text")]
-          )
+          ),
+          _vm._v(" "),
+          _vm.errors.link.length
+            ? _c("span", { staticClass: "invalid-feedback" }, [
+                _vm._v("{{ errors.link.join('"),
+                _c("br"),
+                _vm._v("') }}")
+              ])
+            : _vm._e()
         ])
       ]),
       _vm._v(" "),
@@ -37779,7 +37826,15 @@ var render = function() {
               attrs: { id: "helpLayoutId" }
             },
             [_vm._v("Help text")]
-          )
+          ),
+          _vm._v(" "),
+          _vm.errors.layout.length
+            ? _c("span", { staticClass: "invalid-feedback" }, [
+                _vm._v("{{ errors.layout.join('"),
+                _c("br"),
+                _vm._v("') }}")
+              ])
+            : _vm._e()
         ]),
         _vm._v(" "),
         _c("div", { staticClass: "col" }, [
@@ -37840,12 +37895,21 @@ var render = function() {
               attrs: { id: "helpViewId" }
             },
             [_vm._v("Help text")]
-          )
+          ),
+          _vm._v(" "),
+          _vm.errors.view.length
+            ? _c("span", { staticClass: "invalid-feedback" }, [
+                _vm._v("{{ errors.view.join('"),
+                _c("br"),
+                _vm._v("') }}")
+              ])
+            : _vm._e()
         ])
       ]),
       _vm._v(" "),
       _vm._m(0)
-    ]
+    ],
+    2
   )
 }
 var staticRenderFns = [

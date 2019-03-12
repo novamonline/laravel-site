@@ -1,6 +1,8 @@
 <template>
     <form :action="action" method="POST" @submit.prevent="storePage">
-        <input type="hidden" name="_method" value="PUT" v-show="page.id != null">
+        <template v-if="page.id">
+        <input type="hidden" name="_method" value="PUT" />
+        </template>
         <div class="form-group row">
             <div class="col">
                 <label for="type">Page type</label>
@@ -9,6 +11,7 @@
                     <option v-for="(page_type, index) in PageTypes" :value="page_type.name" :key="'pg-type-'+index">{{ page_type.info }}</option>
                 </select>
                 <small id="helpTypeId" class="form-text text-muted">Help text</small>
+                <span class="invalid-feedback" v-if="errors.type.length">{{ errors.type.join('<br/>') }}</span>
             </div>
             <div class="col">
                 <label for="label">Placement</label>
@@ -18,23 +21,27 @@
                     <option v-for="(page, index) in Pages" :value="page.id" :key="page.id  || 'pg-page_id-'+index"> -> /{{ page.url }}</option>
                 </select>
                 <small id="helpLabelkId" class="form-text text-muted">Help text</small>
+                <span class="invalid-feedback" v-if="errors.page_id.length">{{ errors.page_id.join('<br/>') }}</span>
             </div>
         </div>
         <div class="form-group">
             <label for="title">Page Title</label>
             <input type="text" :class="[{'is-invalid': errors.title.length}, 'form-control']" name="title" id="title" aria-describedby="helpTitleId" placeholder="title" v-model="page.title">
-            <small id="helpTitleId" class="form-text text-muted">Help text</small>
+            <small id="helpTitleId" class="form-text text-muted">Help text [{{ errors.title.length }}]</small>
+            <span class="invalid-feedback" v-if="errors.title.length">{{ errors.title.join('<br/>') }}</span>
         </div>
         <div class="form-group row">
             <div class="col">
                 <label for="label">Menu Label</label>
                 <input type="text" :class="[{'is-invalid': errors.label.length}, 'form-control']" name="label" id="label" aria-describedby="helpTitleId" placeholder="label" v-model="page.label">
-                <small id="helpTitleId" class="form-text text-muted">Help text</small>
+                <small id="helpTitleId" class="form-text text-muted">Help text [{{ errors.label.length }}]</small>
+                <span class="invalid-feedback" v-if="errors.label.length">{{ errors.label.join('<br/>') }}</span>
             </div>
             <div class="col">
                 <label for="link">Link Segment</label>
                 <input type="text" :class="[{'is-invalid': errors.link.length}, 'form-control']" name="link" id="link" aria-describedby="helpLinkId" placeholder="link" v-model="page.link">
                 <small id="helpLinkId" class="form-text text-muted">Help text</small>
+                <span class="invalid-feedback" v-if="errors.link.length">{{ errors.link.join('<br/>') }}</span>
             </div>
         </div>
         <div class="form-group row">
@@ -45,6 +52,7 @@
                     <option v-for="(page, index) in Templates" :value="page.path" :key="'pg-layout-'+(page.id || index)">{{ page.name }}</option>
                 </select>
                 <small id="helpLayoutId" class="form-text text-muted">Help text</small>
+                <span class="invalid-feedback" v-if="errors.layout.length">{{ errors.layout.join('<br/>') }}</span>
             </div>
             <div class="col">
                 <label for="view">Layout</label>
@@ -53,6 +61,7 @@
                     <option v-for="(page, index) in Layouts" :value="page.path" :key="'pg-view-'+( 'page-view-'+index)">{{ page.name }}</option>
                 </select>
                 <small id="helpViewId" class="form-text text-muted">Help text</small>
+                <span class="invalid-feedback" v-if="errors.view.length">{{ errors.view.join('<br/>') }}</span>
             </div>
         </div>
         <div class="form-group">
@@ -111,7 +120,9 @@ export default {
                         $self.page = $self.Pages.find( p => p.id == $self.id);
                     }
                 })
-                .catch(err => console.log(err.response));
+                .catch(err => {
+
+                });
     },
     updated(){
         // axios.get('/pages/create')
@@ -128,7 +139,10 @@ export default {
                 data: $data
             })
             .then( res => console.log(res.data))
-            .catch( err => console.log(err.response.data));
+            .catch( err => {
+                let $errors = err.response.data.errors;
+                _.forOwn($errors, (arr, k) => $self.errors[k] = arr );
+            });
         }
     }
 }
