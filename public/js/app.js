@@ -1977,12 +1977,17 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
+//
 /* harmony default export */ __webpack_exports__["default"] = ({
   name: "page-editor",
   props: ['action', 'pg_id'],
   data: function data() {
     return {
-      page: {
+      base: {
         id: this.pg_id || null,
         page_id: -1,
         title: "",
@@ -1993,17 +1998,25 @@ __webpack_require__.r(__webpack_exports__);
         layout: "",
         view: ""
       },
+      page: this.base,
       errors: {},
       Layouts: {},
       Pages: {},
       PageTypes: {},
       Templates: {},
-      obj: {}
+      obj: {},
+      message: "",
+      alert_class: "collapse"
     };
+  },
+  computed: {
+    paged: function paged() {
+      return this.base;
+    }
   },
   created: function created() {
     var $self = this,
-        $page_data =  true ? 'create' : undefined;
+        $page_data = '/pages/' + !(this.pg_id ? 'create' : this.pg_id);
 
     _.forOwn($self.page, function (obj, k) {
       return $self.errors[k] = [];
@@ -2025,11 +2038,17 @@ __webpack_require__.r(__webpack_exports__);
       }
     }).catch(function (err) {});
   },
-  updated: function updated() {// axios.get('/pages/create')
+  updated: function updated() {
+    // axios.get('/pages/create')
     // .then(res => console.log(res.data))
     // .catch();
+    this.created();
   },
   methods: {
+    checkField: function checkField(field) {
+      var $input = $(field.target).attr('name');
+      this.errors[$input] = [];
+    },
     storePage: function storePage(form) {
       var $self = this,
           $data = {},
@@ -2043,8 +2062,10 @@ __webpack_require__.r(__webpack_exports__);
         method: $data['_method'] || 'post',
         data: $data
       }).then(function (res) {
-        return console.log(res.data);
+        $self.alert_class = "alert-success";
       }).catch(function (err) {
+        $self.alert_class = "alert-danger";
+        $self.message = err.response.data.message;
         var $errors = err.response.data.errors;
 
         _.forOwn($errors, function (arr, k) {
@@ -37455,10 +37476,24 @@ var render = function() {
         submit: function($event) {
           $event.preventDefault()
           return _vm.storePage($event)
-        }
+        },
+        change: _vm.checkField,
+        keyup: _vm.checkField
       }
     },
     [
+      _c(
+        "div",
+        { class: [_vm.alert_class, "alert"], attrs: { role: "alert" } },
+        [
+          _c("h4", { staticClass: "alert-heading" }),
+          _vm._v(" "),
+          _c("p", [_vm._v(_vm._s(_vm.message))]),
+          _vm._v(" "),
+          _c("p", { staticClass: "mb-0" })
+        ]
+      ),
+      _vm._v(" "),
       _vm.page.id
         ? [
             _c("input", {
@@ -37702,11 +37737,10 @@ var render = function() {
           ),
           _vm._v(" "),
           _vm.errors.label.length
-            ? _c("span", { staticClass: "invalid-feedback" }, [
-                _vm._v("{{ errors.label.join('"),
-                _c("br"),
-                _vm._v("') }}")
-              ])
+            ? _c("span", {
+                staticClass: "invalid-feedback",
+                domProps: { innerHTML: _vm._s(_vm.errors.label.join("<br/>")) }
+              })
             : _vm._e()
         ]),
         _vm._v(" "),
@@ -37741,21 +37775,22 @@ var render = function() {
             }
           }),
           _vm._v(" "),
-          _c(
-            "small",
-            {
-              staticClass: "form-text text-muted",
-              attrs: { id: "helpLinkId" }
-            },
-            [_vm._v("Help text")]
-          ),
+          !_vm.errors.link.length
+            ? _c(
+                "small",
+                {
+                  staticClass: "form-text text-muted",
+                  attrs: { id: "helpLinkId" }
+                },
+                [_vm._v("Help text")]
+              )
+            : _vm._e(),
           _vm._v(" "),
           _vm.errors.link.length
-            ? _c("span", { staticClass: "invalid-feedback" }, [
-                _vm._v("{{ errors.link.join('"),
-                _c("br"),
-                _vm._v("') }}")
-              ])
+            ? _c("span", {
+                staticClass: "invalid-feedback",
+                domProps: { innerHTML: _vm._s(_vm.errors.link.join("<br />")) }
+              })
             : _vm._e()
         ])
       ]),
@@ -37829,11 +37864,10 @@ var render = function() {
           ),
           _vm._v(" "),
           _vm.errors.layout.length
-            ? _c("span", { staticClass: "invalid-feedback" }, [
-                _vm._v("{{ errors.layout.join('"),
-                _c("br"),
-                _vm._v("') }}")
-              ])
+            ? _c("span", {
+                staticClass: "invalid-feedback",
+                domProps: { innerHTML: _vm._s(_vm.errors.layout.join("<br/>")) }
+              })
             : _vm._e()
         ]),
         _vm._v(" "),
@@ -37907,43 +37941,36 @@ var render = function() {
         ])
       ]),
       _vm._v(" "),
-      _vm._m(0)
+      _c("div", { staticClass: "form-group" }, [
+        _c(
+          "button",
+          {
+            staticClass: "btn btn-primary",
+            attrs: { name: "version", value: "draft" }
+          },
+          [
+            _vm._v("\n            Save Draft "),
+            _c("span", { staticClass: "badge badge-primary" }, [_vm._v("...")])
+          ]
+        ),
+        _vm._v(" "),
+        _c(
+          "button",
+          {
+            staticClass: "btn btn-primary",
+            attrs: { name: "version", value: "live" }
+          },
+          [
+            _vm._v("\n            Publish "),
+            _c("span", { staticClass: "badge badge-primary" }, [_vm._v("...")])
+          ]
+        )
+      ])
     ],
     2
   )
 }
-var staticRenderFns = [
-  function() {
-    var _vm = this
-    var _h = _vm.$createElement
-    var _c = _vm._self._c || _h
-    return _c("div", { staticClass: "form-group" }, [
-      _c(
-        "button",
-        {
-          staticClass: "btn btn-primary",
-          attrs: { name: "version", value: "draft" }
-        },
-        [
-          _vm._v("\n            Save Draft "),
-          _c("span", { staticClass: "badge badge-primary" }, [_vm._v("...")])
-        ]
-      ),
-      _vm._v(" "),
-      _c(
-        "button",
-        {
-          staticClass: "btn btn-primary",
-          attrs: { name: "version", value: "live" }
-        },
-        [
-          _vm._v("\n            Publish "),
-          _c("span", { staticClass: "badge badge-primary" }, [_vm._v("...")])
-        ]
-      )
-    ])
-  }
-]
+var staticRenderFns = []
 render._withStripped = true
 
 

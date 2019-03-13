@@ -1,5 +1,10 @@
 <template>
-    <form :action="action" method="POST" @submit.prevent="storePage">
+    <form :action="action" method="POST" @submit.prevent="storePage" @change="checkField" @keyup="checkField">
+        <div :class="[alert_class, 'alert']" role="alert">
+            <h4 class="alert-heading"></h4>
+            <p>{{ message }}</p>
+            <p class="mb-0"></p>
+        </div>
         <template v-if="page.id">
         <input type="hidden" name="_method" value="PUT" />
         </template>
@@ -35,13 +40,13 @@
                 <label for="label">Menu Label</label>
                 <input type="text" :class="[{'is-invalid': errors.label.length}, 'form-control']" name="label" id="label" aria-describedby="helpTitleId" placeholder="label" v-model="page.label">
                 <small id="helpTitleId" class="form-text text-muted">Help text [{{ errors.label.length }}]</small>
-                <span class="invalid-feedback" v-if="errors.label.length">{{ errors.label.join('<br/>') }}</span>
+                <span class="invalid-feedback" v-if="errors.label.length" v-html="errors.label.join('<br/>')"></span>
             </div>
             <div class="col">
                 <label for="link">Link Segment</label>
                 <input type="text" :class="[{'is-invalid': errors.link.length}, 'form-control']" name="link" id="link" aria-describedby="helpLinkId" placeholder="link" v-model="page.link">
-                <small id="helpLinkId" class="form-text text-muted">Help text</small>
-                <span class="invalid-feedback" v-if="errors.link.length">{{ errors.link.join('<br/>') }}</span>
+                <small id="helpLinkId" class="form-text text-muted" v-if="!errors.link.length">Help text</small>
+                <span class="invalid-feedback" v-if="errors.link.length" v-html="errors.link.join('<br />')"></span>
             </div>
         </div>
         <div class="form-group row">
@@ -52,7 +57,7 @@
                     <option v-for="(page, index) in Templates" :value="page.path" :key="'pg-layout-'+(page.id || index)">{{ page.name }}</option>
                 </select>
                 <small id="helpLayoutId" class="form-text text-muted">Help text</small>
-                <span class="invalid-feedback" v-if="errors.layout.length">{{ errors.layout.join('<br/>') }}</span>
+                <span class="invalid-feedback" v-if="errors.layout.length" v-html="errors.layout.join('<br/>')"></span>
             </div>
             <div class="col">
                 <label for="view">Layout</label>
@@ -65,10 +70,10 @@
             </div>
         </div>
         <div class="form-group">
-            <button class="btn btn-primary" name="version" value="draft">
+            <button class="btn btn-primary" :name="'version'" value="draft">
                 Save Draft <span class="badge badge-primary">...</span>
             </button>
-            <button class="btn btn-primary" name="version" value="live">
+            <button class="btn btn-primary" :name="'version'" value="live">
                 Publish <span class="badge badge-primary">...</span>
             </button>
         </div>
@@ -81,7 +86,7 @@ export default {
     props: ['action', 'pg_id'],
     data(){
         return {
-            page : {
+            base: {
                 id: this.pg_id || null,
                 page_id: -1,
                 title: "",
@@ -92,16 +97,24 @@ export default {
                 layout: "",
                 view: ""
             },
+            page:this.base,
             errors: {},
             Layouts: {},
             Pages: {},
             PageTypes: {},
             Templates: {},
-            obj: {}
+            obj: {},
+            message: "",
+            alert_class: "collapse"
+        }
+    },
+    computed: {
+        paged(){
+            return this.base;
         }
     },
     created(){
-        let $self = this, $page_data = '/pages/' + !(this.pg_id)? 'create': this.pg_id;
+        let $self = this, $page_data = '/pages/' + !(this.pg_id? 'create': this.pg_id);
         _.forOwn($self.page, (obj, k) => $self.errors[k] = [] );
 
         axios.get($page_data )
@@ -128,8 +141,13 @@ export default {
         // axios.get('/pages/create')
         // .then(res => console.log(res.data))
         // .catch();
+        this.created();
     },
     methods: {
+        checkField(field){
+            var $input = $(field.target).attr('name');
+            this.errors[$input] = [];
+        },
         storePage(form){
             let $self = this, $data = {}, $form = $(form.target), $post = $form.serializeArray();
             $post.forEach(input => { $data[input.name] = input.value; });
@@ -138,8 +156,12 @@ export default {
                 method: $data['_method'] || 'post',
                 data: $data
             })
-            .then( res => console.log(res.data))
+            .then( res => {
+                $self.alert_class = "alert-success";
+            })
             .catch( err => {
+                $self.alert_class = "alert-danger";
+                $self.message = err.response.data.message;
                 let $errors = err.response.data.errors;
                 _.forOwn($errors, (arr, k) => $self.errors[k] = arr );
             });

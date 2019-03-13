@@ -79,14 +79,16 @@ class PageController extends Controller
         $Page = new Page(['user_id' => $request->user()->id]);
 
         $data = $request->except('_token', '_time', 'method');
+        if(empty($data['version'])) $data['version'] = 'draft';
 
         foreach($data as $dbKey => $dbValue){
             $Page->$dbKey = $dbValue;
         }
-        if($Page->save()){
-            return redirect($Page->url)->with('success', 'Successfully created page');
+        if(!$Page->save()){
+            return back()->withInput()->with('error', 'Error while creating page');
         }
-        return back()->withInput()->with('error', 'Error while creating page');
+        if($request->ajax()) return $Page;
+        return redirect($Page->url)->with('success', 'Successfully created page');
     }
 
     /**

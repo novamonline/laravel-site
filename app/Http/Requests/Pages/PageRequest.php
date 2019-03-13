@@ -27,8 +27,10 @@ class PageRequest extends FormRequest
         return request()->isMethod('GET')? []: [
             //
             'title' => 'required',
-            'link' => 'unique:pages',
-            'label' => 'required'
+            'link' => 'required|unique:pages',
+            'label' => 'required',
+            'view' => 'required',
+            'layout' => 'required',
         ];
     }
 }
